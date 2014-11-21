@@ -4,10 +4,10 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              DataContext="{Binding RelativeSource={RelativeSource Self}}"
-             mc:Ignorable="d" Height="457.299" Width="300">
+             mc:Ignorable="d" Height="516.299" Width="300">
     <Grid>
-        <Label Content="Filters" HorizontalAlignment="Stretch" Margin="10,10,0,0" VerticalAlignment="Top"/>
-        <ListView Name="Filters" HorizontalAlignment="Stretch" Height="100" Margin="10,36,0,0" VerticalAlignment="Top" Width="280" ItemsSource="{Binding FilterCollection}" SelectionChanged="Filter_SelectionChanged">
+        <Label Content="Filters" HorizontalAlignment="Stretch" Margin="10,35,10,0" VerticalAlignment="Top"/>
+        <ListView Name="Filters" HorizontalAlignment="Stretch" Height="100" Margin="10,61,10,0" VerticalAlignment="Top" Width="280" ItemsSource="{Binding FilterCollection}" SelectionChanged="Filter_SelectionChanged">
             <ListView.View>
                 <GridView>
                     <GridViewColumn Width="140" Header="FilterName" DisplayMemberBinding="{Binding FilterName}" />
@@ -15,9 +15,9 @@
                 </GridView>
             </ListView.View>
         </ListView>
-        <Button Name="FilterDelete" Content="Delete" HorizontalAlignment="Stretch" Margin="215,141,10,0" VerticalAlignment="Top" Width="75" IsEnabled="False" Click="FilterDelete_Click"/>
-        <Label Content="Consumers" HorizontalAlignment="Stretch" Margin="10,155,0,0" VerticalAlignment="Top"/>
-        <ListView SelectionChanged="Consumers_SelectionChanged" Name="Consumers" HorizontalAlignment="Stretch" Height="100" Margin="10,181,10,0" VerticalAlignment="Top" ItemsSource="{Binding ConsumerCollection}">
+        <Button Name="FilterDelete" Content="Delete" HorizontalAlignment="Stretch" Margin="215,164,10,0" VerticalAlignment="Top" Width="75" IsEnabled="False" Click="FilterDelete_Click"/>
+        <Label Content="Consumers" HorizontalAlignment="Stretch" Margin="10,180,10,0" VerticalAlignment="Top"/>
+        <ListView Name="Consumers" HorizontalAlignment="Stretch" Height="100" Margin="10,206,10,0" VerticalAlignment="Top" ItemsSource="{Binding ConsumerCollection}" SelectionChanged="Consumers_SelectionChanged">
             <ListView.View>
                 <GridView>
                     <GridViewColumn Width="140" Header="ConsumerName" DisplayMemberBinding="{Binding ConsumerName}" />
@@ -25,9 +25,9 @@
                 </GridView>
             </ListView.View>
         </ListView>
-        <Button Name="ConsumerDelete" Content="Delete" HorizontalAlignment="Stretch" Margin="215,286,10,0" VerticalAlignment="Top" Width="75" IsEnabled="False" Click="ConsumerDelete_Click"/>
-        <Label Content="Bindings" HorizontalAlignment="Stretch" Margin="10,300,0,0" VerticalAlignment="Top"/>
-        <ListView Name="Bindings" HorizontalAlignment="Stretch" Height="100" Margin="10,326,10,0" VerticalAlignment="Top" Width="280" ItemsSource="{Binding BindingCollection}" SelectionChanged="Bindings_SelectionChanged">
+        <Button Name="ConsumerDelete" Content="Delete" HorizontalAlignment="Stretch" Margin="215,311,10,0" VerticalAlignment="Top" Width="75" IsEnabled="False" Click="ConsumerDelete_Click"/>
+        <Label Content="Bindings" HorizontalAlignment="Stretch" Margin="10,327,0,0" VerticalAlignment="Top"/>
+        <ListView Name="Bindings" HorizontalAlignment="Stretch" Height="100" Margin="10,354,10,0" VerticalAlignment="Top" Width="280" ItemsSource="{Binding BindingCollection}" SelectionChanged="Bindings_SelectionChanged">
             <ListView.View>
                 <GridView>
                     <GridViewColumn Width="140" Header="FilterName" DisplayMemberBinding="{Binding FilterName}" />
@@ -35,7 +35,12 @@
                     <GridViewColumn Width="140" Header="BindingPath" DisplayMemberBinding="{Binding BindingPath}" />
                 </GridView>
             </ListView.View>
-        </ListView>        
-        <Button Name="BindingDelete" Content="Delete" HorizontalAlignment="Stretch" Margin="215,431,10,0" VerticalAlignment="Top" Width="75" IsEnabled="False" Click="BindingDelete_Click"/>
+        </ListView>
+        <Button Name="BindingDelete" Content="Delete" HorizontalAlignment="Stretch" Margin="215,459,10,0" VerticalAlignment="Top" Width="75" IsEnabled="False" Click="BindingDelete_Click"/>
+        <Label Name="IsAdministrator" Foreground="Red" Content="" HorizontalAlignment="Stretch" Margin="10,485,10,0" VerticalAlignment="Top"/>
+        <Button Name="Refresh" Content="Refresh All" HorizontalAlignment="Stretch" Margin="10,461,0,0" VerticalAlignment="Top" Width="75" Click="Refresh_Click"/>
+        <Label Content="Computer Name" HorizontalAlignment="Stretch" Margin="10,9,0,0" VerticalAlignment="Top"/>
+        <Button Content="Connect" HorizontalAlignment="Stretch" Name="Connect" VerticalAlignment="Top" Width="75" Margin="215,11,10,0" Click="Connect_Click"/>
+        <TextBox Name="ComputerName" Text="localhost" HorizontalAlignment="Stretch" Height="23" Margin="110,12,90,0" TextWrapping="Wrap" VerticalAlignment="Top"/>
     </Grid>
 </UserControl>

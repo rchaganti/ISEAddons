@@ -16,6 +16,7 @@ using System.Windows.Shapes;
 using Microsoft.PowerShell.Host.ISE;
 using System.Management;
 using System.Collections.ObjectModel;
+using System.Security.Principal;
 
 namespace PSMag
 {
@@ -28,9 +29,15 @@ namespace PSMag
         public WMIEventsAddon()
         {
             InitializeComponent();
-            GetFilters();
-            GetConsumers();
-            GetBindings();
+            if (IsAdmin()) {
+                GetFilters();
+                GetConsumers();
+                GetBindings();
+            }
+            else
+            {
+                IsAdministrator.Content = "This add-on requires administrative privileges";
+            }
         }
 
         public ObservableCollection<ConsumerData> ConsumerCollection
@@ -65,9 +72,15 @@ namespace PSMag
         public void GetFilters()
         {
             _FilterCollection.Clear();
-            ManagementClass Allfilters = new ManagementClass(@"root\subscription:__EventFilter");
-            ManagementObjectCollection filterlist = Allfilters.GetInstances();
-            foreach (ManagementObject filter in filterlist)
+            
+            ManagementScope Scope;
+            Scope = new ManagementScope(String.Format("\\\\{0}\\root\\Subscription", ComputerName.Text.ToString()), null);
+            Scope.Connect();
+            
+            SelectQuery WmiQuery = new SelectQuery("SELECT * FROM __EventFilter");
+            ManagementObjectSearcher filterlist = new ManagementObjectSearcher(Scope, WmiQuery);
+            
+            foreach (ManagementObject filter in filterlist.Get())
             {
                 _FilterCollection.Add(new FilterData
                 {
@@ -87,9 +100,13 @@ namespace PSMag
             ConsumerTypeArray[3] = "NTEventLogEventConsumer";
             ConsumerTypeArray[4] = "SMTPEventConsumer";
             foreach (string type in ConsumerTypeArray) {
-                ManagementClass AllConsumers = new ManagementClass(@"root\subscription:" + type);
-                ManagementObjectCollection consumerlist = AllConsumers.GetInstances();
-                foreach (ManagementObject consumer in consumerlist)
+                ManagementScope Scope;
+                Scope = new ManagementScope(String.Format("\\\\{0}\\root\\Subscription", ComputerName.Text.ToString()), null);
+                Scope.Connect();
+
+                SelectQuery WmiQuery = new SelectQuery("SELECT * FROM " + type);
+                ManagementObjectSearcher consumerlist = new ManagementObjectSearcher(Scope, WmiQuery);
+                foreach (ManagementObject consumer in consumerlist.Get())
                 {
                     _ConsumerCollection.Add(new ConsumerData
                     {
@@ -103,9 +120,13 @@ namespace PSMag
         public void GetBindings()
         {
             _BindingCollection.Clear();
-            ManagementClass AllBindings = new ManagementClass(@"root\subscription:__FilterToConsumerBinding");
-            ManagementObjectCollection bindinglist = AllBindings.GetInstances();
-            foreach (ManagementObject binding in bindinglist)
+            ManagementScope Scope;
+            Scope = new ManagementScope(String.Format("\\\\{0}\\root\\Subscription", ComputerName.Text.ToString()), null);
+            Scope.Connect();
+
+            SelectQuery WmiQuery = new SelectQuery("SELECT * FROM __FilterToConsumerBinding");
+            ManagementObjectSearcher bindinglist = new ManagementObjectSearcher(Scope, WmiQuery);
+            foreach (ManagementObject binding in bindinglist.Get())
             {
                 Regex reg = new Regex("[^\"]*");
                 MatchCollection filter = reg.Matches(binding["filter"].ToString());
@@ -140,9 +161,18 @@ namespace PSMag
             if (ConfirmDeletion("This filter may be a part of an existing event binding. Are you sure you want to delete this filter?", "Delete") == true) {
                 try
                 {
-                    ManagementObject seletcedfilter = new ManagementObject(@"root\subscription:__EventFilter.Name='" + FilterView.FilterName.ToString() + "'");
-                    seletcedfilter.Delete();
-                    _FilterCollection.Remove(FilterView);
+                    ManagementScope Scope;
+                    Scope = new ManagementScope(String.Format("\\\\{0}\\root\\Subscription", ComputerName.Text.ToString()), null);
+                    Scope.Connect();
+
+                    SelectQuery WmiQuery = new SelectQuery("SELECT * FROM __EventFilter WHERE Name='" + FilterView.FilterName.ToString() + "'");
+                    ManagementObjectSearcher filterlist = new ManagementObjectSearcher(Scope, WmiQuery);
+
+                    foreach (ManagementObject seletcedfilter in filterlist.Get())
+                    {
+                        seletcedfilter.Delete();
+                        _FilterCollection.Remove(FilterView);
+                    }
                 }
 
                 catch (Exception ex)
@@ -159,9 +189,18 @@ namespace PSMag
             {
                 try
                 {
-                    ManagementObject selectedconsumer = new ManagementObject(@"root\subscription:" + ConsumerView.ConsumerType + ".Name='" + ConsumerView.ConsumerName + "'");
-                    selectedconsumer.Delete();
-                    _ConsumerCollection.Remove(ConsumerView);
+                    ManagementScope Scope;
+                    Scope = new ManagementScope(String.Format("\\\\{0}\\root\\Subscription", ComputerName.Text.ToString()), null);
+                    Scope.Connect();
+
+                    SelectQuery WmiQuery = new SelectQuery("SELECT * FROM " + ConsumerView.ConsumerType + " WHERE Name='" + ConsumerView.ConsumerName.ToString() + "'");
+                    ManagementObjectSearcher consumerlist = new ManagementObjectSearcher(Scope, WmiQuery);
+
+                    foreach (ManagementObject selectedconsumer in consumerlist.Get())
+                    {
+                        selectedconsumer.Delete();
+                        _ConsumerCollection.Remove(ConsumerView);
+                    }
                 }
 
                 catch (Exception ex)
@@ -208,7 +247,31 @@ namespace PSMag
 
             return false;
         }
+
+        private static bool IsAdmin()
+        {
+            WindowsIdentity CurrentIdentity = WindowsIdentity.GetCurrent();
+            WindowsPrincipal UserPrincipal = new WindowsPrincipal(CurrentIdentity);
+            return UserPrincipal.IsInRole(WindowsBuiltInRole.Administrator);
+        }
+
+        private void refreshLists()
+        {
+            GetFilters();
+            GetConsumers();
+            GetBindings();
+        }
+        private void Refresh_Click(object sender, RoutedEventArgs e)
+        {
+            refreshLists();
+        }
+
+        private void Connect_Click(object sender, RoutedEventArgs e)
+        {
+            refreshLists();
+        }
     }
+}
 
     public class ConsumerData
     {
@@ -228,4 +291,3 @@ namespace PSMag
         public string ConsumerName { get; set; }
         public string BindingPath { get; set; }
     }
-}
